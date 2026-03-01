@@ -32,3 +32,42 @@ def test_filter_excludes_interaction_with_different_learner_id() -> None:
     result = _filter_by_item_id(interactions, 1)
     # При правильной фильтрации по item_id должны получить обе записи
     assert len(result) == 2
+
+
+def test_filter_returns_empty_when_item_id_not_found() -> None:
+    interactions = [_make_log(1, 1, 1), _make_log(2, 2, 2)]
+    result = _filter_by_item_id(interactions, 999)
+    assert result == []
+
+
+def test_filter_returns_multiple_with_same_item_id() -> None:
+    interactions = [
+        _make_log(1, 1, 1),
+        _make_log(2, 2, 1),
+        _make_log(3, 3, 2),
+    ]
+    result = _filter_by_item_id(interactions, 1)
+    assert len(result) == 2
+    assert all(i.item_id == 1 for i in result)
+
+
+def test_filter_handles_empty_interactions_list() -> None:
+    result = _filter_by_item_id([], 5)
+    assert result == []
+
+
+def test_filter_with_item_id_zero() -> None:
+    interactions = [_make_log(1, 1, 0), _make_log(2, 2, 1)]
+    result = _filter_by_item_id(interactions, 0)
+    assert len(result) == 1
+    assert result[0].item_id == 0
+
+
+def test_filter_preserves_order() -> None:
+    interactions = [
+        _make_log(1, 1, 2),
+        _make_log(2, 2, 2),
+        _make_log(3, 3, 1),
+    ]
+    result = _filter_by_item_id(interactions, 2)
+    assert result == [interactions[0], interactions[1]]    
